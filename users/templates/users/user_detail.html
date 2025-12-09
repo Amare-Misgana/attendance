@@ -1,0 +1,255 @@
+{% extends 'fragments/dashboard_frag.html' %}
+{% load static %}
+
+{% block title %}
+  User Detail: {{ user_data.username }}
+{% endblock %}
+
+{% block head %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <link rel="stylesheet" href="{% static 'users/css/user_detail.css' %}" />
+{% endblock %}
+
+{% block content %}
+  {{ chart_data|json_script:'attendance-chart-data' }}
+
+  <div class="detail-container">
+    <div class="detail-header">
+      <div>
+        <h1 class="user-title">{{ user_data.username }}</h1>
+        <p class="user-meta">
+          Grade: <strong>{{ profile_data.grade|default:'N/A' }}</strong> | Section: <strong>{{ profile_data.section|default:'N/A' }}</strong>
+        </p>
+      </div>
+ 
+      <div class="action-buttons">
+        {# Assuming 'user_edit' URL pattern exists #}
+        <a href="{% url 'user_edit' user_data.id %}" class="btn-primary-edit"><i class="fas fa-edit"></i> Edit User</a>
+
+        <button type="button" id="open-delete-modal-btn" class="btn-danger-sm"><i class="fas fa-trash-alt"></i> Delete</button>
+      </div>
+    </div>
+
+    {# --- Analytics Grid (Modern Card Layout) --- #}
+    <div class="analytics-grid">
+      <div class="stat-card">
+        <div class="icon-wrapper purple">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+        <div class="stat-details">
+          <h3>{{ total_sessions }}</h3>
+          <span>Total Sessions Targeted</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="icon-wrapper green">
+          <i class="fas fa-percent"></i>
+        </div>
+        <div class="stat-details">
+          <h3>{{ attendance_rate }}%</h3>
+          <span>Overall Attendance Rate (P+L)</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="icon-wrapper blue">
+          <i class="fas fa-check"></i>
+        </div>
+        <div class="stat-details">
+          <h3>{{ analytics.present.count }} ({{ analytics.present.percent }}%)</h3>
+          <span>Present Count</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="icon-wrapper orange">
+          <i class="fas fa-times"></i>
+        </div>
+        <div class="stat-details">
+          <h3>{{ analytics.absent.count }} ({{ analytics.absent.percent }}%)</h3>
+          <span>Absent Count</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="icon-wrapper red">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-details">
+          <h3>{{ analytics.late.count }} ({{ analytics.late.percent }}%)</h3>
+          <span>Late Count</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="icon-wrapper gray">
+          <i class="fas fa-question"></i>
+        </div>
+        <div class="stat-details">
+          <h3>{{ analytics.unmarked.count }} ({{ analytics.unmarked.percent }}%)</h3>
+          <span>Unmarked Count</span>
+        </div>
+      </div>
+    </div>
+
+    {# --- Profile Info and Chart --- #}
+    <div class="main-content-grid">
+      <div class="profile-info-box">
+        <h3 class="section-title">Profile Information</h3>
+        <div class="info-item">
+          <label>Email:</label><span>{{ user_data.email|default:'N/A' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Phone:</label><span>{{ profile_data.phone_number|default:'N/A' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Account (Guardian):</label><span>{{ profile_data.account|default:'N/A' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Staff Status:</label><span>
+            {% if user_data.is_staff %}
+              Yes
+            {% else %}
+              No
+            {% endif %}
+          </span>
+        </div>
+      </div>
+
+      <div class="chart-box">
+        <h3 class="section-title">Attendance Distribution</h3>
+        <div class="chart-wrapper">
+          <canvas id="attendanceChart"></canvas>
+        </div>
+        <div class="chart-legend">
+          <span class="legend-item present-color">Present (P)</span>
+          <span class="legend-item late-color">Late (L)</span>
+          <span class="legend-item absent-color">Absent (A)</span>
+          <span class="legend-item unmarked-color">Unmarked (U)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# --- Custom Confirmation Modal for Deletion --- #}
+  <div id="delete-confirmation-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Confirm Deletion</h2>
+      </div>
+      <div class="modal-body">
+        <p>Are you absolutely sure you want to delete **{{ user_data.username }}**?</p>
+        <p class="warning-text">This will permanently remove the user account, profile data, and all their attendance records. **This cannot be reversed.**</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="cancel-delete-btn" class="btn-secondary">Cancel</button>
+        {# Assuming 'user_delete' URL pattern exists #}
+        <form id="delete-form" action="{% url 'user_delete' user_data.id %}" method="POST">
+          {% csrf_token %}
+          <button type="submit" id="confirm-delete-btn" class="btn-danger-confirm">Yes, Delete Permanently</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // --- CHART.JS Initialization ---
+      const ctx = document.getElementById('attendanceChart').getContext('2d')
+    
+      // 1. Retrieve data safely from the hidden JSON script tag
+      const dataElement = document.getElementById('attendance-chart-data')
+    
+      // Fallback check
+      if (!dataElement) {
+        console.error('Attendance chart data element not found (ID: attendance-chart-data).')
+        return
+      }
+    
+      // Parse the JSON content
+      let chartDataArray
+      try {
+        chartDataArray = JSON.parse(dataElement.textContent)
+      } catch (e) {
+        console.error('Failed to parse chart data:', e)
+        chartDataArray = [0, 0, 0, 0] // Default to all zeros if parsing fails
+      }
+    
+      const chartData = {
+        labels: ['Present', 'Late', 'Absent', 'Unmarked'],
+        datasets: [
+          {
+            data: chartDataArray,
+            backgroundColor: [
+              '#4CAF50', // Present (Green)
+              '#FF9800', // Late (Orange)
+              '#F44336', // Absent (Red)
+              '#6c757d' // Unmarked (Gray)
+            ],
+            hoverOffset: 4
+          }
+        ]
+      }
+    
+      const config = {
+        type: 'pie',
+        data: chartData,
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  let label = context.label || ''
+                  if (label) {
+                    label += ': '
+                  }
+                  if (context.parsed !== null) {
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0)
+                    const value = context.parsed
+                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%'
+                    label += `${value} (${percentage})`
+                  }
+                  return label
+                }
+              }
+            }
+          }
+        }
+      }
+    
+      new Chart(ctx, config)
+    
+      // --- DELETE MODAL Logic ---
+      const openDeleteModalBtn = document.getElementById('open-delete-modal-btn')
+      const deleteModal = document.getElementById('delete-confirmation-modal')
+      const cancelDeleteBtn = document.getElementById('cancel-delete-btn')
+    
+      function openModal() {
+        deleteModal.style.display = 'flex'
+      }
+    
+      function closeModal() {
+        deleteModal.style.display = 'none'
+      }
+    
+      if (openDeleteModalBtn) {
+        openDeleteModalBtn.addEventListener('click', openModal)
+      }
+    
+      if (cancelDeleteBtn) {
+        cancelDeleteBtn.addEventListener('click', closeModal)
+      }
+    
+      window.addEventListener('click', function (event) {
+        if (event.target === deleteModal) {
+          closeModal()
+        }
+      })
+    })
+  </script>
+{% endblock %}

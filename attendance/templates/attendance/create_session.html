@@ -1,0 +1,197 @@
+{% extends 'fragments/dashboard_frag.html' %}
+{% load static %}
+
+{% block title %}
+  Create Session
+{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'attendance/css/create_session.css' %}" />
+{% endblock %}
+
+{% block content %}
+  <div class="form-container">
+    <h2 style="color: var(--color-accent-green); margin-bottom: 20px;">Start New Attendance Session</h2>
+
+    <div id="session-creator">
+      <div class="form-group">
+        <label for="id_title">Session Title</label>
+        <input type="text" id="id_title" placeholder="E.g., Morning Lecture - Grade 10" required />
+      </div>
+
+      <div class="form-group">
+        <label>Filter & Select Targets</label>
+
+        <div class="filter-controls">
+          <select id="grade-filter" class="filter-select">
+            <option value="">All Grades</option>
+            {% for grade in unique_grades %}
+              <option value="{{ grade }}">{{ grade }}</option>
+            {% endfor %}
+          </select>
+
+          <select id="section-filter" class="filter-select">
+            <option value="">All Sections</option>
+            {% for section in unique_sections %}
+              <option value="{{ section }}">{{ section }}</option>
+            {% endfor %}
+          </select>
+
+          <input type="text" id="user-search" placeholder="Search by name..." class="filter-search" />
+        </div>
+
+        <div class="checkbox-grid" id="targets-list">
+          {% for profile in all_profiles %}
+            <div class="checkbox-item" data-user-id="{{ profile.user.id }}" data-username="{{ profile.user.username|lower }}" data-grade="{{ profile.grade|lower }}" data-section="{{ profile.section|lower }}">
+              <input type="checkbox" id="user-{{ profile.user.id }}" value="{{ profile.user.id }}" class="target-checkbox" />
+              <label for="user-{{ profile.user.id }}">
+                {{ profile.user.username }}
+                <span class="meta-label">({{ profile.grade }} - {{ profile.section }})</span>
+              </label>
+            </div>
+          {% endfor %}
+        </div>
+        <p class="selection-summary">
+          <span id="selected-count">0</span> users selected.
+          <a href="#" id="mass-select-btn" class="mass-action-link">Mass Select Visible</a>
+          <a href="#" id="mass-deselect-btn" class="mass-action-link">Mass Deselect Visible</a>
+        </p>
+      </div>
+
+      <button type="button" id="create-session-btn" class="btn-primary">Create Session</button>
+    </div>
+  </div>
+
+  <script>
+    // --- Utility Function (CSRF token) ---
+    function getCookie(name) {
+      let cookieValue = null
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';')
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim()
+          if (cookie.substring(0, name.length + 1) === name + '=') {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
+            break
+          }
+        }
+      }
+      return cookieValue
+    }
+    
+    const csrfToken = getCookie('csrftoken')
+    const searchInput = document.getElementById('user-search')
+    const gradeFilter = document.getElementById('grade-filter')
+    const sectionFilter = document.getElementById('section-filter')
+    const userItems = document.querySelectorAll('.checkbox-item')
+    const selectedCountSpan = document.getElementById('selected-count')
+    const targetsList = document.getElementById('targets-list')
+    const massSelectBtn = document.getElementById('mass-select-btn')
+    const massDeselectBtn = document.getElementById('mass-deselect-btn')
+    
+    // --- Core Filtering Logic ---
+    function applyFilters() {
+      const searchTerm = searchInput.value.toLowerCase().trim()
+      const selectedGrade = gradeFilter.value.toLowerCase()
+      const selectedSection = sectionFilter.value.toLowerCase()
+      let checkedCount = 0
+    
+      userItems.forEach((item) => {
+        const username = item.dataset.username
+        const itemGrade = item.dataset.grade
+        const itemSection = item.dataset.section
+        const checkbox = item.querySelector('.target-checkbox')
+    
+        // Check visibility conditions
+        const matchesSearch = username.includes(searchTerm)
+        const matchesGrade = !selectedGrade || itemGrade === selectedGrade
+        const matchesSection = !selectedSection || itemSection === selectedSection
+    
+        if (matchesSearch && matchesGrade && matchesSection) {
+          item.style.display = 'flex' // Show
+        } else {
+          item.style.display = 'none' // Hide
+        }
+    
+        // Count selected users (even if hidden)
+        if (checkbox.checked) {
+          checkedCount++
+        }
+      })
+      selectedCountSpan.textContent = checkedCount
+    }
+    
+    // --- Mass Selection Logic ---
+    function massAction(select) {
+      // select: true for select, false for deselect
+      userItems.forEach((item) => {
+        // Check if the item is currently visible
+        if (item.style.display !== 'none') {
+          const checkbox = item.querySelector('.target-checkbox')
+          checkbox.checked = select
+        }
+      })
+      applyFilters() // Recalculate count
+    }
+    
+    // --- Event Listeners ---
+    searchInput.addEventListener('input', applyFilters)
+    gradeFilter.addEventListener('change', applyFilters)
+    sectionFilter.addEventListener('change', applyFilters)
+    targetsList.addEventListener('change', applyFilters)
+    
+    massSelectBtn.addEventListener('click', function (e) {
+      e.preventDefault()
+      massAction(true)
+    })
+    
+    massDeselectBtn.addEventListener('click', function (e) {
+      e.preventDefault()
+      massAction(false)
+    })
+    
+    // --- AJAX Session Creation Logic (Unchanged) ---
+    document.getElementById('create-session-btn').addEventListener('click', function () {
+      const title = document.getElementById('id_title').value
+      const targets = Array.from(document.querySelectorAll('.target-checkbox:checked')).map((cb) => cb.value)
+    
+      if (!title || title.trim() === '') {
+        alert('Please enter a session title.')
+        return
+      }
+      if (targets.length === 0) {
+        alert('Please select at least one user for the session.')
+        return
+      }
+    
+      const data = {
+        title: title,
+        targets: targets
+      }
+    
+      fetch(window.location.href, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify(data)
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            window.location.href = data.redirect_url
+          } else {
+            alert('Error creating session: ' + data.message)
+          }
+        })
+        .catch((error) => {
+          console.error('Fetch error:', error)
+          alert('An unexpected error occurred.')
+        })
+    })
+    
+    // Initial run to set the correct selected count
+    applyFilters()
+  </script>
+{% endblock %}

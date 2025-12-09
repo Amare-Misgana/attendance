@@ -1,0 +1,123 @@
+{% extends 'fragments/dashboard_frag.html' %}
+{% load static %}
+
+{% block title %}
+  Dashboard
+{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'attendance/css/dashboard.css' %}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+{% endblock %}
+
+{% block content %}
+  <div class="dashboard-content">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="icon-wrapper green">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-details">
+          <h3>{{ users }}</h3>
+          <span>Total Users</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="icon-wrapper blue">
+          <i class="fas fa-chalkboard-user"></i>
+        </div>
+        <div class="stat-details">
+          <h3>{{ attendance_sessions }}</h3>
+          <span>Sessions</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="icon-wrapper orange">
+          <i class="fas fa-briefcase"></i>
+        </div>
+        <div class="stat-details">
+          <h3>35</h3>
+          <span>Teachers</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="icon-wrapper purple">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-details">
+          <h3>5</h3>
+          <span>Pending Actions</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-section">
+      <div class="table-header">
+        <h2>User Directory</h2>
+        <a href="{% url 'export_users' %}" class="btn-secondary"><i class="fas fa-download"></i>Export EXCEL</a>
+      </div>
+
+      <table id="usersTable" class="modern-table">
+        <thead>
+          <tr>
+            <th>User Profile</th>
+            <th>Contact Info</th>
+            <th>Role / Status</th>
+            <th>Account Type</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for profile in profiles %}
+            <tr>
+              <td>
+                <div class="user-profile-cell">
+                  <div class="user-avatar">{{ profile.user.username|slice:':1'|upper }}</div>
+                  <div class="user-meta">
+                    <span class="name">{{ profile.user.username }}</span>
+                    <span class="id">ID: #{{ profile.id }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="contact-meta">
+                  <span class="email">{{ profile.user.email }}</span>
+                  <span class="phone">{{ profile.phone_number }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="status-badge">{{ profile.grade }} &bull; {{ profile.section }}</span>
+              </td>
+              <td>{{ profile.account|default:'Standard' }}</td>
+              <td class="text-right">
+                <a href="{% url 'user_detail' user_id=profile.user.id %}" class="btn-icon" title="See More"><i class="fas fa-eye"></i></a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <style></style>
+
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+  <script>
+    $(document).ready(function () {
+      $('#usersTable').DataTable({
+        pageLength: 5,
+        lengthChange: false, // Cleaner look without the "Show 10 entries" dropdown
+        language: {
+          search: '',
+          searchPlaceholder: 'Search users...'
+        },
+        columnDefs: [
+          { orderable: false, targets: 4 } // Disable sorting on Action column
+        ]
+      })
+    })
+  </script>
+{% endblock %}

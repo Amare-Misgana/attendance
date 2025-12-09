@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+  Attendance
+{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'public/css/home.css' %}" />
+{% endblock %}
+
+{% block body %}
+  <header>
+    <div class="left">CSSS ICT Club</div>
+    <div class="right">
+      {% if request.user.is_authenticated %}
+        <a href="{% url 'dashboard' %}" class="btn btn-login">Dashboard</a>
+      {% else %}
+        <a href="{% url 'login' %}" class="btn btn-login">Login</a>
+      {% endif %}
+    </div>
+  </header>
+
+  <main>
+    <h1>Online Attendance System</h1>
+    <p class="subtitle">Track attendance securely and efficiently.</p>
+
+    <div class="actions">
+      {% if request.user.is_authenticated %}
+        <a href="{% url 'dashboard' %}" class="btn">Go to dashboard</a>
+      {% else %}
+        <a href="{% url 'login' %}" class="btn">Login to take Attendance</a>
+      {% endif %}
+    </div>
+  </main>
+{% endblock %}

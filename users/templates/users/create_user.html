@@ -1,0 +1,36 @@
+{% extends 'fragments/dashboard_frag.html' %}
+{% load static %}
+
+{% block title %}
+  Dashboard
+{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'users/css/create_user.css' %}" />
+{% endblock %}
+
+{% block content %}
+  <div class="login-container">
+    <h1>Create User</h1>
+    <form method="POST">
+      {% csrf_token %}
+      <div class="form-grid">
+        <input type="text" name="username" placeholder="Username" required />
+        <input type="email" name="email" placeholder="Email" required />
+
+        <input type="password" name="password" placeholder="Password" required />
+        <input type="password" name="confirm_password" placeholder="Confirm Password" required />
+
+        <input type="text" name="grade" placeholder="Grade" required />
+        <input type="text" name="section" placeholder="Section" required />
+
+        <input type="text" name="account" placeholder="Account (optional)" />
+        <input type="text" name="phone_number" placeholder="Phone Number" required />
+      </div>
+
+      <div class="full-width">
+        <button type="submit">Create</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

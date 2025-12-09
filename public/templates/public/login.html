@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Login
+{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'public/css/login.css' %}" />
+{% endblock %}
+
+{% block body %}
+  <header class="login-header">
+    <a href="/" class="back-btn"><i class="ri-arrow-left-line"></i></a>
+  </header>
+
+  <main class="login-container">
+    <h1>Login</h1>
+
+    <form method="POST">
+      {% csrf_token %}
+
+      <input type="text" name="username" placeholder="Username" required />
+      <input type="password" name="password" placeholder="Password" required />
+
+      <button type="submit">Login</button>
+    </form>
+
+    <p class="note">Only authorized staff can access the attendance system.</p>
+  </main>
+{% endblock %}

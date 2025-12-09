@@ -1,0 +1,144 @@
+.list-container {
+  padding: 20px;
+  background: var(--color-container-bg);
+  border-radius: 8px;
+  border: 1px solid var(--color-border-dark);
+}
+
+.list-title {
+  color: var(--color-text-light);
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 20px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px 15px;
+  background: var(--color-input-bg);
+  border: 1px solid var(--color-border-dark);
+  color: var(--color-text-light);
+  border-radius: 6px;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--color-border-dark);
+  color: var(--color-placeholder);
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+.btn-secondary i {
+  padding: 0 0.3em;
+}
+.btn-secondary:hover {
+  border-color: var(--color-text-light);
+  color: var(--color-text-light);
+}
+
+.btn-create {
+  background: var(--color-accent-green);
+  color: white;
+  padding: 10px 15px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.btn-create:hover {
+  background: var(--color-accent-green-hover);
+}
+
+/* --- Table Styling --- */
+.table-responsive {
+  overflow-x: auto;
+}
+
+.session-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.session-table th,
+.session-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-dark);
+}
+
+.session-table thead th {
+  background-color: #333;
+  color: var(--color-placeholder);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.session-row {
+  color: var(--color-text-light);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.session-row:hover {
+  background-color: #2a2a2a;
+}
+
+/* --- Status and Count Cells --- */
+.session-title-link {
+  color: var(--color-accent-green);
+  text-decoration: none;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.active-badge {
+  background-color: #38761d; /* Dark Green */
+  color: #ccffcc;
+}
+
+.closed-badge {
+  background-color: #666; /* Gray */
+  color: #e0e0e0;
+}
+
+.count-cell {
+  font-weight: 600;
+}
+
+/* Color coding status count columns */
+.session-table th.status-present,
+.session-table td.status-present {
+  color: #4caf50;
+}
+.session-table th.status-late,
+.session-table td.status-late {
+  color: #ff9800;
+}
+.session-table th.status-absent,
+.session-table td.status-absent {
+  color: #f44336;
+}
+.session-table td.status-unmarked {
+  color: #aaa;
+}

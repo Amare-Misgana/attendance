@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background: #0d0d0d;
+        color: #eee;
+      }
+
+      :root {
+        --color-darkest-bg: #121212;
+        --color-container-bg: #1e1e1e;
+        --color-input-bg: #2a2a2a;
+        --color-input-bg-focus: #383838;
+        --color-border-dark: #333;
+        --color-text-light: #e0e0e0;
+        --color-placeholder: #888;
+        --color-accent-green: #4caf50;
+        --color-accent-green-hover: #45a049;
+        --color-button-text: white;
+        --color-shadow: rgba(0, 0, 0, 0.5);
+      }
+
+      /* --- Sidebar --- */
+      .sidebar {
+        width: 250px;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background-color: var(--color-container-bg);
+        box-shadow: 2px 0 5px var(--color-shadow);
+        padding-top: 20px;
+        z-index: 1000;
+      }
+
+      .sidebar-header {
+        text-align: center;
+        padding: 0 15px 30px;
+        color: var(--color-accent-green);
+        border-bottom: 1px solid var(--color-border-dark);
+        margin-bottom: 15px;
+      }
+
+      .sidebar-header h2 {
+        font-size: 1.5rem;
+        font-weight: 400;
+      }
+
+      .sidebar-nav {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .nav-item {
+        margin-bottom: 5px;
+      }
+
+      .nav-link {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        text-decoration: none;
+        color: var(--color-text-light);
+        font-size: 16px;
+        transition: background-color 0.2s, color 0.2s;
+      }
+
+      .nav-link i {
+        margin-right: 10px;
+        font-size: 1.1rem;
+        width: 20px;
+        text-align: center;
+      }
+
+      .nav-link:hover {
+        background-color: #2a2a2a;
+        color: var(--color-accent-green);
+      }
+
+      .nav-link.active {
+        background-color: var(--color-accent-green);
+        color: white;
+      }
+
+      .sidebar-footer {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        border-top: 1px solid var(--color-border-dark);
+        padding: 10px 0;
+      }
+
+      .logout-link {
+        display: flex;
+        align-items: center;
+        color: #f44336;
+        padding: 12px 20px;
+        text-decoration: none;
+        transition: background-color 0.2s, color 0.2s;
+      }
+
+      .logout-link:hover {
+        background-color: #2a2a2a;
+        color: #ff6659;
+      }
+
+      /* --- Main Content --- */
+      .main-content {
+        margin-left: 250px;
+        padding: 30px;
+        min-height: 100vh;
+        background: var(--color-darkest-bg);
+        transition: margin-left 0.3s;
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 200px;
+        }
+        .main-content {
+          margin-left: 200px;
+          padding: 20px;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .sidebar {
+          position: relative;
+          width: 100%;
+          height: auto;
+        }
+        .main-content {
+          margin-left: 0;
+        }
+      }
+    </style>
+
+    <title>
+      {% block title %}Dashboard Base{% endblock %}
+    </title>
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    {% include 'fragments/messages.html' %}
+    {% load static %}
+
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h2>App Dashboard</h2>
+      </div>
+
+      <ul class="sidebar-nav">
+        <li class="nav-item">
+          <a href="{% url 'dashboard' %}" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        </li>
+
+        <li class="nav-item">
+          <a href="{% url 'create-user' %}" class="nav-link"><i class="fas fa-user-plus"></i> Create User</a>
+        </li>
+
+        <li class="nav-item">
+          <a href="{% url 'attendance_session_list' %}" class="nav-link"><i class="fas fa-clipboard-list"></i> Attendance</a>
+        </li>
+
+        <li class="nav-item">
+          <a href="{% url 'create_attendance_session' %}" class="nav-link"><i class="fas fa-calendar-plus"></i> Create Attendance</a>
+        </li>
+
+        <li class="nav-item">
+          {% comment %}<a href="{% url 'profile' %}" class="nav-link">{% endcomment %}
+          <a href="#" class="nav-link"><i class="fas fa-user-circle"></i> Profile</a>
+        </li>
+
+        <li class="nav-item">
+          {% comment %}<a href="{% url 'settings' %}" class="nav-link">{% endcomment %}
+          <a href="#" class="nav-link"><i class="fas fa-cog"></i> Settings</a>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        {% comment %}<a href="{% url 'logout' %}" class="nav-link logout-link">{% endcomment %}
+        <a href="#" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </div>
+    </div>
+
+    <div class="main-content">
+      {% block content %}{% endblock %}
+    </div>
+  </body>
+</html>

@@ -1,0 +1,52 @@
+{% extends 'fragments/dashboard_frag.html' %}
+{% load static %}
+
+{% block title %}
+  Edit {{ user_data.username }}
+{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'users/css/user_edit.css' %}" />
+{% endblock %}
+
+{% block content %}
+  <div class="form-container">
+    <h2 style="color: var(--color-accent-green); margin-bottom: 20px;">Edit User: {{ user_data.username }}</h2>
+    <p class="meta-link">
+      <a href="{% url 'user_detail' user_data.id %}"><i class="fas fa-arrow-left"></i> Back to User Detail</a>
+    </p>
+
+    <form method="POST" class="edit-form">
+      {% csrf_token %}
+
+      <h3 class="section-title">User Account Details</h3>
+      <div class="form-group">
+        <label for="id_username">Username</label>
+        <input type="text" id="id_username" name="username" value="{{ user_data.username }}" required />
+      </div>
+
+      <h3 class="section-title">Profile Details</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="id_grade">Grade</label>
+          <input type="text" id="id_grade" name="grade" value="{{ profile_data.grade|default:'' }}" />
+        </div>
+        <div class="form-group">
+          <label for="id_section">Section</label>
+          <input type="text" id="id_section" name="section" value="{{ profile_data.section|default:'' }}" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="id_phone">Phone Number</label>
+        <input type="text" id="id_phone" name="phone_number" value="{{ profile_data.phone_number|default:'' }}" />
+      </div>
+      <div class="form-group">
+        <label for="id_account">Account (Guardian Name)</label>
+        <input type="text" id="id_account" name="account" value="{{ profile_data.account|default:'' }}" />
+      </div>
+
+      <button type="submit" class="btn-primary">Save Changes</button>
+    </form>
+  </div>
+{% endblock %}

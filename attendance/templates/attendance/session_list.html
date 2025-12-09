@@ -1,0 +1,94 @@
+{% extends 'fragments/dashboard_frag.html' %}
+{% load static %}
+{% block title %}
+  All Attendance Sessions
+{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'attendance/css/session_list.css' %}" />
+{% endblock %}
+
+{% block content %}
+  <div class="list-container">
+    <h1 class="list-title">All Attendance Sessions</h1>
+
+    <div class="controls">
+      <input type="text" id="session-search" placeholder="Search by session title..." class="search-input" />
+      <a href="{% url 'create_attendance_session' %}" class="btn-create"><i class="fas fa-plus"></i> Create New Session</a>
+      <a href="{% url 'export_attendance' %}" class="btn-secondary"><i class="fas fa-download"></i>Export EXCEL</a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="session-table" id="session-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Created</th>
+            <th>Status</th>
+            <th>Targets</th>
+            <th class="status-present">P</th>
+            <th class="status-late">L</th>
+            <th class="status-absent">A</th>
+            <th>Unmarked</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for session in sessions %}
+            <tr class="session-row" data-title="{{ session.title|lower }}" data-url="{% url 'attendance_session_detail' session.id %}">
+              <td>
+                <strong class="session-title-link">{{ session.title }}</strong>
+              </td>
+              <td>{{ session.created_at|date:'M d, Y H:i' }}</td>
+              <td class="status-cell">
+                {% if session.is_ended %}
+                  <span class="status-badge closed-badge">CLOSED</span>
+                {% else %}
+                  <span class="status-badge active-badge">ACTIVE</span>
+                {% endif %}
+              </td>
+              <td>{{ session.target_count }}</td>
+              <td class="count-cell status-present">{{ session.present_count }}</td>
+              <td class="count-cell status-late">{{ session.late_count }}</td>
+              <td class="count-cell status-absent">{{ session.absent_count }}</td>
+              <td class="count-cell status-unmarked">{{ session.unmarked_count }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="8" style="text-align: center; padding: 20px;">No attendance sessions found.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const searchInput = document.getElementById('session-search')
+      const tableBody = document.querySelector('#session-table tbody')
+      const rows = tableBody.querySelectorAll('.session-row')
+    
+      // 1. Search Filtering Logic
+      searchInput.addEventListener('input', function () {
+        const searchTerm = this.value.toLowerCase().trim()
+    
+        rows.forEach((row) => {
+          const title = row.dataset.title
+          if (title.includes(searchTerm)) {
+            row.style.display = '' // Show row
+          } else {
+            row.style.display = 'none' // Hide row
+          }
+        })
+      })
+    
+      // 2. Clickable Row Navigation
+      rows.forEach((row) => {
+        const url = row.dataset.url
+        row.addEventListener('click', function () {
+          window.location.href = url
+        })
+      })
+    })
+  </script>
+{% endblock %}

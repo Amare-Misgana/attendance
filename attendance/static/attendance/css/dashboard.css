@@ -1,0 +1,305 @@
+/* --- Global Cleanup --- */
+.dashboard-content {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* --- 1. Slider Refinement --- */
+.slider-container {
+  position: relative;
+  height: 220px;
+  background: var(--color-container-bg);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 30px;
+  /* Subtle border instead of shadow for flatter look */
+  border: 1px solid var(--color-border-dark);
+}
+
+.slide {
+  display: none;
+  height: 100%;
+  width: 100%;
+  padding: 0 60px; /* More padding */
+  box-sizing: border-box;
+  background: linear-gradient(to right, #121212, #1e1e1e);
+  align-items: center;
+}
+
+.slide.active {
+  display: flex;
+}
+
+.slide-content h2 {
+  color: var(--color-accent-green);
+  font-size: 2rem;
+  font-weight: 300;
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
+}
+
+.slide-content p {
+  color: var(--color-placeholder);
+  font-size: 1rem;
+  max-width: 600px;
+}
+
+.slider-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 60px; /* Align left with text */
+}
+
+.dot {
+  height: 8px;
+  width: 8px;
+  margin-right: 8px;
+  background-color: #444;
+  border-radius: 50%;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.dot.active {
+  background-color: var(--color-accent-green);
+}
+
+/* --- 2. Stat Cards (Professional) --- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.stat-card {
+  background: var(--color-container-bg);
+  border: 1px solid var(--color-border-dark);
+  padding: 24px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s ease, border-color 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-accent-green);
+}
+
+.icon-wrapper {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  margin-right: 20px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.icon-wrapper.green {
+  color: #4caf50;
+  background: rgba(76, 175, 80, 0.1);
+}
+.icon-wrapper.blue {
+  color: #2196f3;
+  background: rgba(33, 150, 243, 0.1);
+}
+.icon-wrapper.orange {
+  color: #ff9800;
+  background: rgba(255, 152, 0, 0.1);
+}
+.icon-wrapper.purple {
+  color: #9c27b0;
+  background: rgba(156, 39, 176, 0.1);
+}
+
+.stat-details h3 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: var(--color-text-light);
+  font-weight: 600;
+}
+
+.stat-details span {
+  color: var(--color-placeholder);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* --- 3. Table Styling (The "Beautiful" Part) --- */
+.table-section {
+  background: var(--color-container-bg);
+  border-radius: 8px;
+  border: 1px solid var(--color-border-dark);
+  padding: 30px;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.table-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--color-text-light);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--color-border-dark);
+  color: var(--color-placeholder);
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+.btn-secondary i {
+  padding: 0 0.3em;
+}
+.btn-secondary:hover {
+  border-color: var(--color-text-light);
+  color: var(--color-text-light);
+}
+
+/* Custom Table Reset */
+table.modern-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--color-text-light);
+}
+
+table.modern-table thead th {
+  text-align: left;
+  padding: 15px 10px;
+  border-bottom: 1px solid var(--color-border-dark);
+  color: var(--color-placeholder);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+table.modern-table tbody tr {
+  border-bottom: 1px solid #252525;
+  transition: background-color 0.2s;
+}
+
+table.modern-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+table.modern-table tbody td {
+  padding: 16px 10px;
+  vertical-align: middle;
+  font-size: 0.95rem;
+}
+
+/* User Avatar Cell */
+.user-profile-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  background: var(--color-accent-green);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+.user-meta {
+  display: flex;
+  flex-direction: column;
+}
+.user-meta .name {
+  font-weight: 500;
+  color: #fff;
+}
+.user-meta .id {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+/* Contact Cell */
+.contact-meta {
+  display: flex;
+  flex-direction: column;
+}
+.contact-meta .email {
+  font-size: 0.9rem;
+}
+.contact-meta .phone {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 2px;
+}
+
+/* Status Badge */
+.status-badge {
+  background: rgba(76, 175, 80, 0.15);
+  color: #66bb6a;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Actions */
+.btn-icon {
+  color: #666;
+  margin-left: 10px;
+  font-size: 1rem;
+  transition: color 0.2s;
+}
+.btn-icon:hover {
+  color: var(--color-accent-green);
+}
+.btn-icon.delete:hover {
+  color: #e53935;
+}
+
+/* --- DataTables Overrides --- */
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_paginate {
+  color: var(--color-placeholder) !important;
+  font-size: 0.85rem;
+  margin-top: 15px;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  color: #fff;
+  outline: none;
+}
+
+/* Hide default datatable borders to use our clean ones */
+table.dataTable.no-footer {
+  border-bottom: none !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+  background: var(--color-accent-green) !important;
+  border: none !important;
+  color: white !important;
+  border-radius: 4px;
+}
