@@ -4,7 +4,13 @@ from django.contrib import messages
 
 
 def home(request):
-    return render(request, "public/home.html")
+    try:
+        if request.user:
+            is_authenticated = True
+    except Exception as e:
+        is_authenticated = False
+    context = {"is_authenticated": is_authenticated}
+    return render(request, "public/home.html", context)
 
 
 def login_page(request):

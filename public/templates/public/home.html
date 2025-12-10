@@ -12,7 +12,7 @@
   <header>
     <div class="left">CSSS ICT Club</div>
     <div class="right">
-      {% if request.user.is_authenticated %}
+      {% if is_authenticated %}
         <a href="{% url 'dashboard' %}" class="btn btn-login">Dashboard</a>
       {% else %}
         <a href="{% url 'login' %}" class="btn btn-login">Login</a>
@@ -25,7 +25,7 @@
     <p class="subtitle">Track attendance securely and efficiently.</p>
 
     <div class="actions">
-      {% if request.user.is_authenticated %}
+      {% if is_authenticated %}
         <a href="{% url 'dashboard' %}" class="btn">Go to dashboard</a>
       {% else %}
         <a href="{% url 'login' %}" class="btn">Login to take Attendance</a>

@@ -324,9 +324,7 @@ def export_users_excel(request):
 def export_attendance_matrix_excel(request):
     """Generates an Excel file with the Attendance Matrix."""
 
-    all_students = (
-        User.objects.filter(profile__isnull=False).order_by("username").only("username")
-    )
+    all_users = Profile.objects.all().order_by("username")
 
     all_sessions = AttendanceSession.objects.all().order_by("created_at")
 
@@ -342,12 +340,13 @@ def export_attendance_matrix_excel(request):
 
     columns = ["User"] + session_titles
 
-    for student in all_students:
-        row = {"User": student.username}
+    for user in all_users:
+        user = user.user.username + "-" + user.grade + "-" + user.section
+        row = {"User": user}
 
         for session in all_sessions:
 
-            status = attendance_lookup.get((student.id, session.id), "N/A")
+            status = attendance_lookup.get((user.id, session.id), "N/A")
             row[session.title] = status
 
         attendance_matrix_data.append(row)
