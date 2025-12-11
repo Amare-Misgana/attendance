@@ -2,35 +2,113 @@
 {% load static %}
 
 {% block title %}
-  Dashboard
+  Create User
 {% endblock %}
 
 {% block head %}
   <link rel="stylesheet" href="{% static 'users/css/create_user.css' %}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 {% endblock %}
 
 {% block content %}
-  <div class="login-container">
-    <h1>Create User</h1>
-    <form method="POST">
-      {% csrf_token %}
-      <div class="form-grid">
-        <input type="text" name="username" placeholder="Username" required />
-        <input type="email" name="email" placeholder="Email" required />
+  <div class="form-page-container">
+    <div class="form-card">
+      <div class="form-header">
+        <h1>New User Registration</h1>
+        <p>Enter the details to create a new user and profile account.</p>
 
-        <input type="password" name="password" placeholder="Password" required />
-        <input type="password" name="confirm_password" placeholder="Confirm Password" required />
-
-        <input type="text" name="grade" placeholder="Grade" required />
-        <input type="text" name="section" placeholder="Section" required />
-
-        <input type="text" name="account" placeholder="Account (optional)" />
-        <input type="text" name="phone_number" placeholder="Phone Number" required />
+        {# Display Django messages (Success/Error/etc.) #}
+        {% if messages %}
+          <div class="message-container">
+            {% for message in messages %}
+              <p class="{% if message.tags %}
+                  
+                  
+                  
+                  message-{{ message.tags }}
+                {% endif %}">{{ message }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
       </div>
 
-      <div class="full-width">
-        <button type="submit">Create</button>
-      </div>
-    </form>
+      <form method="POST">
+        {% csrf_token %}
+
+        <div class="form-group-section">
+          <h2>User Credentials</h2>
+          <div class="form-grid">
+            {# 1. Username #}
+            <div class="form-field">
+              <label for="id_username">Username</label>
+              <input type="text" id="id_username" name="username" placeholder="e.g., john_doe" required />
+            </div>
+
+            {# 2. Email #}
+            <div class="form-field">
+              <label for="id_email">Email</label>
+              <input type="email" id="id_email" name="email" placeholder="user@example.com" required />
+            </div>
+
+            {# 3. Password #}
+            <div class="form-field">
+              <label for="id_password">Password</label>
+              <input type="password" id="id_password" name="password" placeholder="••••••••" required />
+            </div>
+
+            {# 4. Confirm Password #}
+            <div class="form-field">
+              <label for="id_confirm_password">Confirm Password</label>
+              <input type="password" id="id_confirm_password" name="confirm_password" placeholder="••••••••" required />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group-section">
+          <h2>Profile Details</h2>
+          <div class="form-grid">
+            {# 5. Grade #}
+            <div class="form-field">
+              <label for="id_grade">Grade</label>
+              <input type="number" id="id_grade" name="grade" placeholder="e.g., 10" required />
+            </div>
+
+            {# 6. Section #}
+            <div class="form-field">
+              <label for="id_section">Section</label>
+              <input type="text" id="id_section" name="section" placeholder="e.g., A" required />
+            </div>
+
+            {# 7. Field (Uses the 'fields' list passed from your view) #}
+            <div class="form-field">
+              <label for="id_field">Field</label>
+              <select name="field" id="id_field" required>
+                {% for f in fields %}
+                  <option value="{{ f }}">{{ f|capfirst }}</option>
+                {% empty %}
+                  <option value="">-- No fields available --</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            {# 8. Phone Number #}
+            <div class="form-field">
+              <label for="id_phone_number">Phone Number</label>
+              <input type="text" id="id_phone_number" name="phone_number" placeholder="e.g., +1234567890" required />
+            </div>
+
+            {# 9. Account Type (Full-Width, Optional) #}
+            <div class="form-field full-width">
+              <label for="id_account">Account</label>
+              <input type="text" id="id_account" name="account" placeholder="e.g., @veyraxp" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary"><i class="fas fa-user-plus"></i> Create User</button>
+        </div>
+      </form>
+    </div>
   </div>
 {% endblock %}

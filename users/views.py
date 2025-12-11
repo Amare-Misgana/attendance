@@ -3,6 +3,13 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from .models import Profile
 from django.contrib.auth.decorators import user_passes_test
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib import messages
+from django.db import transaction
+from django.db.models import Count, Q
+from .models import User, Profile  # Ensure models are imported
+from attendance.models import Attendance, AttendanceSession
 
 
 User = get_user_model()
@@ -12,6 +19,7 @@ admin_required = user_passes_test(lambda u: u.is_superuser, login_url="/login/")
 
 @admin_required
 def create_user(request):
+    field_choices = [c[0] for c in Profile.FIELD_CHOICE]
     if request.method == "POST":
         username = request.POST.get("username")
         email = request.POST.get("email")
@@ -19,6 +27,7 @@ def create_user(request):
         confirm_password = request.POST.get("confirm_password")
         grade = request.POST.get("grade")
         section = request.POST.get("section")
+        field = request.POST.get("field")
         account = request.POST.get("account")
         phone_number = request.POST.get("phone_number")
 
@@ -38,43 +47,35 @@ def create_user(request):
             return redirect("create-user")
 
         # Create user
-        user = User.objects.create(username=username, email=email)
-        user.set_password(password)
-        user.save()
+        try:
+            user = User.objects.create(username=username, email=email)
+            user.set_password(password)
+            user.save()
+            Profile.objects.create(
+                user=user,
+                grade=grade,
+                section=section,
+                account=account or None,
+                phone_number=phone_number,
+                field=field,
+            )
+        except Exception as e:
+            print(str(e))
+            messages.error(request, "Can't create the user.")
+            return redirect("create-user")
 
         # Create profile
-        Profile.objects.create(
-            user=user,
-            grade=grade,
-            section=section,
-            account=account or None,
-            phone_number=phone_number,
-        )
 
         messages.success(request, "User created successfully!")
         return redirect("create-user")
 
-    return render(request, "users/create_user.html")
+    return render(request, "users/create_user.html", {"fields": field_choices})
 
 
 @admin_required
 def users_list(request):
     profiles = Profile.objects.select_related("user").all()
     return render(request, "users/users_list.html", {"profiles": profiles})
-
-
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib import messages
-from django.db import transaction
-from django.db.models import Count, Q
-from .models import User, Profile  # Ensure models are imported
-from attendance.models import Attendance, AttendanceSession
-
-
-# Helper function to ensure only staff/admins can access this view
-def is_staff_or_admin(user):
-    return user.is_staff or user.is_superuser
 
 
 @transaction.atomic
@@ -164,6 +165,7 @@ def user_edit(request, user_id):
     user_to_edit = get_object_or_404(User, id=user_id)
     profile, created = Profile.objects.get_or_create(user=user_to_edit)
 
+    field_choices = [c[0] for c in Profile.FIELD_CHOICE]
     if request.method == "POST":
         new_username = request.POST.get("username")
 
@@ -174,14 +176,16 @@ def user_edit(request, user_id):
         grade = request.POST.get("grade", "")
         section = request.POST.get("section", "").upper()
         account = request.POST.get("account", "")
+        field = request.POST.get("field", "")
         phone_number = request.POST.get("phone_number", "")
 
-        old = grade + section + account + phone_number + new_username
+        old = grade + section + account + phone_number + field + new_username
         new = (
             profile.grade
             + profile.section
             + profile.account
             + profile.phone_number
+            + profile.field
             + user_to_edit.username
         )
 
@@ -206,5 +210,5 @@ def user_edit(request, user_id):
     return render(
         request,
         "users/user_edit.html",
-        {"user_data": user_to_edit, "profile_data": profile},
+        {"user_data": user_to_edit, "profile_data": profile, "fields": field_choices},
     )

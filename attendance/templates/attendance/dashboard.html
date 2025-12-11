@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="{% static 'attendance/css/dashboard.css' %}" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -33,21 +34,21 @@
         </div>
       </div>
       <div class="stat-card">
-        <div class="icon-wrapper orange">
-          <i class="fas fa-briefcase"></i>
-        </div>
-        <div class="stat-details">
-          <h3>35</h3>
-          <span>Teachers</span>
-        </div>
-      </div>
-      <div class="stat-card">
         <div class="icon-wrapper purple">
           <i class="fas fa-clock"></i>
         </div>
         <div class="stat-details">
-          <h3>5</h3>
-          <span>Pending Actions</span>
+          <h3>{{ active_sessions }}</h3>
+          <span>Active</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="icon-wrapper orange">
+          <i class="fas fa-briefcase"></i>
+        </div>
+        <div class="stat-details">
+          <h3>{{ ended_sessions }}</h3>
+          <span>Ended</span>
         </div>
       </div>
     </div>
@@ -63,8 +64,9 @@
           <tr>
             <th>User Profile</th>
             <th>Contact Info</th>
+            <th>Field</th>
             <th>Role / Status</th>
-            <th>Account Type</th>
+            <th>Account</th>
             <th class="text-right">Actions</th>
           </tr>
         </thead>
@@ -87,9 +89,12 @@
                 </div>
               </td>
               <td>
-                <span class="status-badge">{{ profile.grade }} &bull; {{ profile.section }}</span>
+                <span class="status-badge">{{ profile.field|capfirst }}</span>
               </td>
-              <td>{{ profile.account|default:'Standard' }}</td>
+              <td>
+                <span class="status-badge">{{ profile.grade }}-{{ profile.section }}</span>
+              </td>
+              <td>{{ profile.account|default:'N/A' }}</td>
               <td class="text-right">
                 <a href="{% url 'user_detail' user_id=profile.user.id %}" class="btn-icon" title="See More"><i class="fas fa-eye"></i></a>
               </td>
@@ -98,26 +103,85 @@
         </tbody>
       </table>
     </div>
-  </div>
 
-  <style></style>
+    <div class="chart-section">
+      <div class="chart-header">
+        <h2>Students by Grade</h2>
+      </div>
+      <div class="chart-wrapper">
+        <canvas id="gradeChart"></canvas>
+      </div>
+    </div>
+  </div>
 
   <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
   <script>
     $(document).ready(function () {
+      // DataTable Config
       $('#usersTable').DataTable({
         pageLength: 5,
-        lengthChange: false, // Cleaner look without the "Show 10 entries" dropdown
+        lengthChange: false,
         language: {
           search: '',
           searchPlaceholder: 'Search users...'
         },
         columnDefs: [
-          { orderable: false, targets: 4 } // Disable sorting on Action column
+          { orderable: false, targets: 4 }
         ]
-      })
-    })
+      });
+
+      // Chart.js Config
+      const ctx = document.getElementById('gradeChart').getContext('2d');
+      const gradeLabels = {{ grade_labels|safe }};
+      const gradeCounts = {{ grade_counts|safe }};
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: gradeLabels,
+          datasets: [{
+            label: 'Students',
+            data: gradeCounts,
+            // Matches .status-badge background: rgba(76, 175, 80, 0.15)
+            backgroundColor: 'rgba(76, 175, 80, 0.15)', 
+            // Matches .status-badge color: #66bb6a
+            borderColor: '#66bb6a',
+            borderWidth: 1,
+            borderRadius: 4,
+            barPercentage: 0.5,
+            hoverBackgroundColor: 'rgba(76, 175, 80, 0.3)'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1e1e1e',
+                titleColor: '#fff',
+                bodyColor: '#ccc',
+                borderColor: '#333',
+                borderWidth: 1,
+                padding: 10,
+                displayColors: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#888', stepSize: 1 }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#888' }
+            }
+          }
+        }
+      });
+    });
   </script>
 {% endblock %}

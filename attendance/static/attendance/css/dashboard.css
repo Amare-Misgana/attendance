@@ -15,7 +15,6 @@
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 30px;
-  /* Subtle border instead of shadow for flatter look */
   border: 1px solid var(--color-border-dark);
 }
 
@@ -23,7 +22,7 @@
   display: none;
   height: 100%;
   width: 100%;
-  padding: 0 60px; /* More padding */
+  padding: 0 60px;
   box-sizing: border-box;
   background: linear-gradient(to right, #121212, #1e1e1e);
   align-items: center;
@@ -50,7 +49,7 @@
 .slider-dots {
   position: absolute;
   bottom: 20px;
-  left: 60px; /* Align left with text */
+  left: 60px;
 }
 
 .dot {
@@ -67,7 +66,7 @@
   background-color: var(--color-accent-green);
 }
 
-/* --- 2. Stat Cards (Professional) --- */
+/* --- 2. Stat Cards --- */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -132,7 +131,7 @@
   font-weight: 500;
 }
 
-/* --- 3. Table Styling (The "Beautiful" Part) --- */
+/* --- 3. Table Styling --- */
 .table-section {
   background: var(--color-container-bg);
   border-radius: 8px;
@@ -171,7 +170,7 @@
   color: var(--color-text-light);
 }
 
-/* Custom Table Reset */
+/* Table Reset */
 table.modern-table {
   width: 100%;
   border-collapse: collapse;
@@ -204,7 +203,7 @@ table.modern-table tbody td {
   font-size: 0.95rem;
 }
 
-/* User Avatar Cell */
+/* User Avatar */
 .user-profile-cell {
   display: flex;
   align-items: center;
@@ -235,7 +234,7 @@ table.modern-table tbody td {
   color: #666;
 }
 
-/* Contact Cell */
+/* Contact */
 .contact-meta {
   display: flex;
   flex-direction: column;
@@ -269,11 +268,8 @@ table.modern-table tbody td {
 .btn-icon:hover {
   color: var(--color-accent-green);
 }
-.btn-icon.delete:hover {
-  color: #e53935;
-}
 
-/* --- DataTables Overrides --- */
+/* DataTables Overrides */
 .dataTables_wrapper .dataTables_length,
 .dataTables_wrapper .dataTables_filter,
 .dataTables_wrapper .dataTables_info,
@@ -292,7 +288,6 @@ table.modern-table tbody td {
   outline: none;
 }
 
-/* Hide default datatable borders to use our clean ones */
 table.dataTable.no-footer {
   border-bottom: none !important;
 }
@@ -302,4 +297,30 @@ table.dataTable.no-footer {
   border: none !important;
   color: white !important;
   border-radius: 4px;
+}
+
+/* --- 4. Chart Section --- */
+.chart-section {
+  /* Copying .table-section properties for consistent "Background Border" look */
+  background: var(--color-container-bg);
+  border: 1px solid var(--color-border-dark);
+  border-radius: 8px;
+  padding: 30px;
+  margin-top: 30px;
+}
+
+.chart-header {
+  margin-bottom: 25px;
+}
+
+.chart-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--color-text-light);
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 350px;
+  width: 100%;
 }

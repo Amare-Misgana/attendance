@@ -22,7 +22,7 @@
           Grade: <strong>{{ profile_data.grade|default:'N/A' }}</strong> | Section: <strong>{{ profile_data.section|default:'N/A' }}</strong>
         </p>
       </div>
- 
+
       <div class="action-buttons">
         {# Assuming 'user_edit' URL pattern exists #}
         <a href="{% url 'user_edit' user_data.id %}" class="btn-primary-edit"><i class="fas fa-edit"></i> Edit User</a>
@@ -105,7 +105,10 @@
           <label>Phone:</label><span>{{ profile_data.phone_number|default:'N/A' }}</span>
         </div>
         <div class="info-item">
-          <label>Account (Guardian):</label><span>{{ profile_data.account|default:'N/A' }}</span>
+          <label>Account:</label><span>{{ profile_data.account|default:'N/A' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Field:</label><span>{{ profile_data.field|default:'Other'|capfirst }}</span>
         </div>
         <div class="info-item">
           <label>Staff Status:</label><span>

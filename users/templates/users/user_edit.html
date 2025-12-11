@@ -29,7 +29,7 @@
       <div class="form-row">
         <div class="form-group">
           <label for="id_grade">Grade</label>
-          <input type="text" id="id_grade" name="grade" value="{{ profile_data.grade|default:'' }}" />
+          <input type="number" id="id_grade" name="grade" value="{{ profile_data.grade|default:'' }}" />
         </div>
         <div class="form-group">
           <label for="id_section">Section</label>
@@ -44,6 +44,18 @@
       <div class="form-group">
         <label for="id_account">Account (Guardian Name)</label>
         <input type="text" id="id_account" name="account" value="{{ profile_data.account|default:'' }}" />
+      </div>
+      <div class="form-group">
+        <label for="id_account">Field</label>
+        <select name="field" id="id_field">
+          {% for field in fields %}
+            {% if profile_data.field == field %}
+              <option value="{{ profile_data.field }}" selected>{{ profile_data.field|capfirst }}</option>
+            {% else %}
+              <option value="{{ field }}">{{ field|capfirst }}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
       </div>
 
       <button type="submit" class="btn-primary">Save Changes</button>

@@ -18,15 +18,51 @@ User = get_user_model()
 admin_required = user_passes_test(lambda u: u.is_superuser, login_url="/login/")
 
 
+# @admin_required
+# def dashboard(request):
+#     profiles = Profile.objects.select_related("user").all()
+#     attendance_sessions = AttendanceSession.objects.all().count()
+#     users = profiles.count()
+#     context = {
+#         "profiles": profiles,
+#         "users": users,
+#         "attendance_sessions": attendance_sessions,
+#     }
+#     return render(request, "attendance/dashboard.html", context)
+
+from django.db.models import Count
+
+
 @admin_required
 def dashboard(request):
     profiles = Profile.objects.select_related("user").all()
-    attendance_sessions = AttendanceSession.objects.all().count()
     users = profiles.count()
+
+    # Total sessions
+    attendance_sessions = AttendanceSession.objects.all().count()
+
+    # Active sessions
+    active_sessions = AttendanceSession.objects.filter(is_ended=False).count()
+
+    # Ended sessions
+    ended_sessions = AttendanceSession.objects.filter(is_ended=True).count()
+
+    # --- Chart Logic: Students per Grade ---
+    grade_distribution = (
+        Profile.objects.values("grade").annotate(total=Count("id")).order_by("grade")
+    )
+
+    grade_labels = [item["grade"] for item in grade_distribution]
+    grade_counts = [item["total"] for item in grade_distribution]
+
     context = {
         "profiles": profiles,
         "users": users,
         "attendance_sessions": attendance_sessions,
+        "active_sessions": active_sessions,
+        "ended_sessions": ended_sessions,
+        "grade_labels": grade_labels,
+        "grade_counts": grade_counts,
     }
     return render(request, "attendance/dashboard.html", context)
 
@@ -265,24 +301,19 @@ def attendance_session_list(request):
 def export_users_excel(request):
     """Generates an Excel file with User and Profile data."""
 
-    # 1. Fetch Data
-    users_with_profile = (
-        User.objects.select_related("profile").all().order_by("username")
-    )
+    ## 1. Fetch Data
+    profiles = Profile.objects.select_related("user").order_by("user__username")
 
     user_profile_data = []
-    for user in users_with_profile:
-        # Check if the user has a profile
-        profile = getattr(user, "profile", None)
-
+    for profile in profiles:
         data = {
-            "Username": user.username,
-            "Email": user.email,
-            # Use data from Profile, checking for existence
-            "Grade": profile.grade if profile else "",
-            "Section": profile.section if profile else "",
-            "Account": profile.account if profile else "",
-            "Phone Number": profile.phone_number if profile else "",
+            "Username": profile.user.username,  # access User correctly
+            "Email": profile.user.email,  # access User email
+            "Grade": profile.grade,
+            "Section": profile.section,
+            "Account": profile.account or "N/A",
+            "Phone Number": profile.phone_number,
+            "Field": profile.get_field_display(),  # readable field choice
         }
         user_profile_data.append(data)
 
@@ -295,24 +326,18 @@ def export_users_excel(request):
         df_profile.to_excel(writer, sheet_name="User_Profiles", index=False)
 
         # Optional: Auto-adjust column widths
-        workbook = writer.book
-        worksheet = workbook["User_Profiles"]
-        for column in worksheet.columns:
-            max_length = 0
-            column_name = column[0].column_letter
-            for cell in column:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except:
-                    pass
-            adjusted_width = max_length + 2
-            worksheet.column_dimensions[column_name].width = adjusted_width
+        worksheet = writer.sheets["User_Profiles"]
+        for column_cells in worksheet.columns:
+            max_length = max(
+                len(str(cell.value)) for cell in column_cells if cell.value
+            )
+            worksheet.column_dimensions[column_cells[0].column_letter].width = (
+                max_length + 2
+            )
 
     # 4. Prepare Response
-    excel_data = output.getvalue()
     response = HttpResponse(
-        excel_data,
+        output.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
     response["Content-Disposition"] = 'attachment; filename="users_report.xlsx"'
@@ -324,52 +349,46 @@ def export_users_excel(request):
 def export_attendance_matrix_excel(request):
     """Generates an Excel file with the Attendance Matrix."""
 
-    all_users = Profile.objects.all().order_by("username")
-
+    all_profiles = Profile.objects.select_related("user").order_by("user__username")
     all_sessions = AttendanceSession.objects.all().order_by("created_at")
-
     attendance_records = Attendance.objects.select_related("session", "user").all()
 
+    # Build lookup dictionary
     attendance_lookup = {
         (record.user_id, record.session_id): record.status
         for record in attendance_records
     }
 
-    attendance_matrix_data = []
     session_titles = [session.title for session in all_sessions]
-
     columns = ["User"] + session_titles
 
-    for user in all_users:
-        user = user.user.username + "-" + user.grade + "-" + user.section
-        row = {"User": user}
+    attendance_matrix_data = []
+    for profile in all_profiles:
+        user_label = f"{profile.user.username}-{profile.grade}-{profile.section}"
+        row = {"User": user_label}
 
         for session in all_sessions:
-
-            status = attendance_lookup.get((user.id, session.id), "N/A")
+            status = attendance_lookup.get((profile.user.id, session.id), "-")
             row[session.title] = status
 
         attendance_matrix_data.append(row)
 
+    # Create DataFrame
     df_attendance = pd.DataFrame(attendance_matrix_data, columns=columns)
 
+    # Write to Excel
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
         df_attendance.to_excel(writer, sheet_name="Attendance_Matrix", index=False)
 
-        workbook = writer.book
-        worksheet = workbook["Attendance_Matrix"]
-        for column in worksheet.columns:
-            max_length = 0
-            column_name = column[0].column_letter
-            for cell in column:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except:
-                    pass
-            adjusted_width = max_length + 2
-            worksheet.column_dimensions[column_name].width = adjusted_width
+        worksheet = writer.sheets["Attendance_Matrix"]
+        for column_cells in worksheet.columns:
+            max_length = max(
+                len(str(cell.value)) for cell in column_cells if cell.value
+            )
+            worksheet.column_dimensions[column_cells[0].column_letter].width = (
+                max_length + 2
+            )
 
     excel_data = output.getvalue()
     response = HttpResponse(
